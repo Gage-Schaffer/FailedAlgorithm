@@ -16,4 +16,4 @@ jobs:
           aws-region: us-east-1
       - name: Sync Files to S3 bucket
         run: |
-          aws s3 sync build s3://underscore-site-failed-algorithm06252021 --delete
+          aws s3 sync build s3://underscore-site-failed-algorithm06252021/ --delete
