@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <section class="title-bar">
+        <div class="site-title">
+            <h1>Failed Algorithim</h1>
+            <p>Gage's Home on the Internet.</p>
+        </div>
+        <div class="navigation">
+            <a>Home</a>
+            <a>Posts & Articles</a>
+            <a>Script Repo</a>
+            <a>Cool Stuff</a>
+            <a>About This Site</a>
+            <a>About Me</a>
+
+        </div>
+
+    </section>
+    <div class="post-wrapper">
+        <script src="" async defer></script>
+        <h1>Handling SQL Elegantly in Python</h1>
+<p>I do a lot of querying against large datasets at my job. The queries quickly devolve into a jumbled (ugly) mess of SQL instructions, and I hate putting those queries into my code.</p>
+<p>I also wanted a way to pick between databases when calling those databases since I have a few different areas that I’m gathering data.</p>
+<p>I wanted to come up with a way to “hide” those queries and databases, and hopefully as a side effect, make them easier to maintain and manage. I needed separation and isolation of the data retrieval from the functions that use it.</p>
+<p>After some trial, error, and fruitless visits to StackOverflow, I came up with a method that accomplishes this exact need. Let’s take a look.</p>
+<p>Just for reference, the only library that you’ll truly need is pyodbc for database connectivity. I use configparser to build my connection string, but that can be handled however you feel fit.</p>
+<h2>Separating and reading the queries</h2>
+<p>I already had several SQL queries embedded inside of my code, so the first step was saving these as separate files instead. Since I only have around 10 queries, I decided to just do this via copy-paste methods. I created a new directory in my project just named “sql” and stored all the queries as separate sql files. Here’s an example:</p>
+<pre><code>SELECT *
+  FROM production_stats
+ WHERE product_id = 3
+</code></pre>
+<p>Obviously, this is a dummy query. I can’t reveal any trade secrets. But from here, I can save this as a file with the .sql extension. I’ll put this file in the “sql” directory located with my project.</p>
+<p>Afterwards, I wrote a helper function that extracts the text of the SQL file and returns it. I use Python’s context manager to ensure that we properly close the file after getting its contents.</p>
+<pre><code>def get_sql(path) -&gt; str:
+   with open(path, &quot;r&quot;) as f:
+       query = f.read()
+       return query
+
+</code></pre>
+<p>This helper function takes a string that is the path to the requested sql file. This could probably be done more effectively and resiliently using pathlib, but I like this way too.</p>
+<p>That’s it! No more long and ugly sql queries embedded inside of our Python code. We can now store a sql query in it’s own directory, read those files, and use the queries in other functions. We have hidden and isolated the queries.</p>
+<h2>Connecting to the databases</h2>
+<p>At this point, I have sql queries, but I need to gracefully access the database before they’re of any use. I wrote another helper function that opens a database and returns a cursor for that database.</p>
+<pre><code>def open_db(db: str) -&gt; pyodbc.Cursor:
+   &quot;&quot;&quot;
+   Takes a string of which database is to be connected to, and returns a cursor
+   object to that database.
+  
+   :param db:
+   :return: pyodbc.Cursor for the requested database
+   &quot;&quot;&quot;
+   if db == &quot;Production1&quot;:
+       server = config[&quot;Production1&quot;][&quot;SERVER&quot;]
+       database = config[&quot;Production1&quot;][&quot;DATABASE&quot;]
+       user = config[&quot;Production1&quot;][&quot;USER&quot;]
+       password = config[&quot;Production1&quot;][&quot;PASSWORD&quot;]
+   elif db == &quot;Production2&quot;:
+       server = config[&quot;Production2&quot;][&quot;SERVER&quot;]
+       database = config[&quot;Production2&quot;][&quot;DATABASE&quot;]
+       user = config[&quot;Production2&quot;][&quot;USER&quot;]
+       password = config[&quot;Production2&quot;][&quot;PASSWORD&quot;]
+
+   connector = f'DRIVER=;SERVER={server};DATABASE={database};UID={user};PWD={password}'
+   conn = pyodbc.connect(connector)
+   cursor = conn.cursor()
+   return cursor
+</code></pre>
+<p>You’ll notice that my function takes a string. This is for determining which database to open since I have two options. This is a magic string which I typically don’t like, but it fits my purposes.</p>
+<p>After picking the correct database, I pull my server information from an .ini config file. Of course, this can be done in many ways, but configparser is built into the standard library and is easy enough.</p>
+<p>I build the connection string, create the connection, and return the cursor object. We’re now connected to the server.</p>
+<p>Using Queries and The Database
+The moment of truth has arrived. Now that we have a good connection and a way to extract sql queries, we can finally use them to extract data. We can write a function like this:</p>
+<pre><code class="language-python">def query_production_data():
+	db = open_db(&quot;Production1&quot;)
+	sql = get_sql(&quot;sql/production_stats.sql&quot;)
+	Results = db.execute(sql).fetchall()
+	db.close()
+	return results
+
+</code></pre>
+<p>To me, this is the cleanest way to handle the querying of data. It’s clean, easy to manage, and pythonic.</p>
+<p>Note that here, we have to close the database connection. Since our open_db() function returns a cursor object, we need to clean that connection up once we’re done with it. I believe that this could also be done with coroutines and asyncio, but we’ll just stick with this method for now.</p>
+<p>We’re ready to use the data!</p>
+<h2>Recap</h2>
+<ul>
+<li>Let’s recap my method for handling SQL in Python:</li>
+<li>Store sql queries in a separate directory as a file with the .sql file extension</li>
+<li>Write a helper function that reads those files and returns the text contents</li>
+<li>Write a helper function that opens the database and returns a cursor</li>
+<li>Write the actual function to pull the data, using the above two helper functions to open a connection to the database, get the sql query that will be ran, and then execute the query, store the results, close the connection, and then return</li>
+<li>Rejoice that your code is much cleaner now</li>
+</ul>
+
+    </div>
+</body>
+
+</html>

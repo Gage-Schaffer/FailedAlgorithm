@@ -1,0 +1,140 @@
+body {
+
+    background-color: #ccc;
+}
+
+a {
+    text-decoration: none;
+}
+a:visited {
+    text-decoration: none;
+    color: #333;
+}
+
+.content-wrapper {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    background-color: #e8e8e8;
+    padding: 25px;
+    color: #333;
+
+}
+
+h1 {
+    color: #b90504;
+}
+
+.title-bar {
+
+    background-color: #333;
+    padding: 25px;
+    text-align: center;
+    color: whitesmoke;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+.title-bar a {
+    color: whitesmoke;
+    border-radius: 10px;
+    transition-duration: 250ms;
+}
+.title-bar a:hover {
+    color: whitesmoke;
+    background-color: #b90504;
+    transition-duration: 250ms;
+}
+
+
+.navigation {
+    padding: 10px;
+    text-align: center;
+    color: whitesmoke;
+}
+
+.navigation a {
+    padding: 10px;
+    background: #222;
+}
+
+.introduction {
+    border-radius: 5px;
+    margin-top: 25px;
+    padding: 55px;
+    text-align: center;
+    background-color: #b90504;
+    color: whitesmoke;
+
+}
+
+.row {
+    display: flex;
+    text-align: center;
+}
+
+.col {
+    flex: 1;
+    margin: 5px;
+    padding: 25px;
+    color: #111;
+    background-color: #ddd;
+    border-radius: 15px;
+
+}
+
+.site-about {
+    margin-top: 75px;
+    text-align: center;
+}
+
+.posts {
+    margin-top: 75px;
+    text-align: left;
+}
+
+.post-card {
+    background-color: #ddd;
+    color: #333;
+    padding: 25px 25px 55px 25px;
+    margin-bottom: 25px;
+    border-radius: 15px;
+}
+.post-card * {
+
+    margin-top: 25px;
+}
+
+.link-btn {
+    background: #b90504;
+    color: white;
+    padding: 10px;
+    border-radius: 25px;
+    transition-duration: 250ms;
+}
+
+.link-btn:visited {
+    color: white;
+}
+
+.link-btn:hover {
+    padding: 15px;
+    background: white;
+    border: 1px solid red;
+    color: red;
+    transition-duration: 250ms;
+}
+
+
+.article-content {
+    padding: 25px;
+    width: 60%;
+    margin-left: 20%;
+    margin-right: 20%;
+}
+.code-block {
+    background-color: #333;
+    color: whitesmoke;
+    border-radius: 15px;
+    padding: 25px;
+}
